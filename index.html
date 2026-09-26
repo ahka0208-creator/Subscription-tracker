@@ -1,1 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🧾 訂閱服務「年度燒錢黑洞」總管家</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --primary: #f43f5e;
+            --primary-glow: rgba(244, 63, 94, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            text-align: center;
+        }
+        .header h2 {
+            color: var(--primary);
+            font-size: 24px;
+            margin: 0 0 5px 0;
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+        .header p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        /* 總結算儀表板卡片 */
+        .dashboard-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .stat-box .value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .stat-box.highlight .value {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        /* 表單卡片 */
+        .form-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid #334155;
+        }
+
+        .form-card h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--accent);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: rgba(0, 0, 0, 0.2);
+            color: #fff;
+            font-size: 15px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #be123c 100%);
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.97); }
+
+        /* 訂閱清單 */
+        .list-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .list-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sub-item {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #334155;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sub-info h4 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            color: var(--text-main);
+        }
+
+        .sub-info span {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .sub-price-action {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sub-price {
+            text-align: right;
+        }
+        .sub-price .amount {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .sub-price .cycle {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .delete-btn:hover { color: var(--primary); }
+
+        .empty-tip {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 30px;
+            font-size: 14px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            border: 1px dashed #334155;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>🧾 訂閱燒錢黑洞管家</h2>
+        <p>無痛掌控自動扣費，拒絕隱形開支</p>
+    </div>
+
+    <!-- 儀表板：總結算 -->
+    <div class="dashboard-card">
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="label">每月總支出</div>
+                <div class="value" id="monthlyTotal">$0</div>
+            </div>
+            <div class="stat-box highlight">
+                <div class="label">🔥 每年燒錢黑洞</div>
+                <div class="value" id="yearlyTotal">$0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增訂閱表單 -->
+    <div class="form-card">
+        <h3>➕ 新增自動扣費服務</h3>
+        <input type="text" id="subName" placeholder="服務名稱 (例如: Netflix, iCloud)">
+        <div class="input-group">
+            <input type="number" id="subPrice" placeholder="金額 (HKD)" step="0.1">
+            <select id="subCycle">
+                <option value="month">每月</option>
+                <option value="year">每年</option>
+            </select>
+        </div>
+        <button class="btn" onclick="addSubscription()">加入管家清單</button>
+    </div>
+
+    <!-- 訂閱清單區 -->
+    <div class="list-section">
+        <div class="list-title">
+            <span>已訂閱服務清單</span>
+            <span id="itemCount">0 項</span>
+        </div>
+        <div id="subList" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- 動態插入 -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // 初始化或從 LocalStorage 讀取資料
+    let subscriptions = JSON.parse(localStorage.getItem('subscriptions')) || [
+        { id: 1, name: 'Netflix 高級版', price: 93, cycle: 'month' },
+        { id: 2, name: 'iCloud 200GB', price: 23, cycle: 'month' },
+        { id: 3, name: 'ChatGPT Plus', price: 1560, cycle: 'year' }
+    ];
+
+    function saveAndRender() {
+        localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+        render();
+    }
+
+    function addSubscription() {
+        const nameInput = document.getElementById('subName');
+        const priceInput = document.getElementById('subPrice');
+        const cycleSelect = document.getElementById('subCycle');
+
+        const name = nameInput.value.trim();
+        const price = parseFloat(priceInput.value);
+
+        if (!name || isNaN(price) || price <= 0) {
+            alert('請輸入有效嘅服務名稱與金額！');
+            return;
+        }
+
+        const newSub = {
+            id: Date.now(),
+            name: name,
+            price: price,
+            cycle: cycleSelect.value
+        };
+
+        subscriptions.push(newSub);
+        nameInput.value = '';
+        priceInput.value = '';
+        saveAndRender();
+    }
+
+    function deleteSubscription(id) {
+        subscriptions = subscriptions.filter(sub => sub.id !== id);
+        saveAndRender();
+    }
+
+    function render() {
+        const listContainer = document.getElementById('subList');
+        const monthlyTotalEl = document.getElementById('monthlyTotal');
+        const yearlyTotalEl = document.getElementById('yearlyTotal');
+        const itemCountEl = document.getElementById('itemCount');
+
+        listContainer.innerHTML = '';
+
+        if (subscriptions.length === 0) {
+            listContainer.innerHTML = `<div class="empty-tip">✨ 暫時未有記錄，快啲將你嘅訂閱加入嚟睇下每年燒幾多錢！</div>`;
+            monthlyTotalEl.innerText = '$0';
+            yearlyTotalEl.innerText = '$0';
+            itemCountEl.innerText = '0 項';
+            return;
+        }
+
+        // 按每年換算開支由大到小排序
+        const sortedSubs = [...subscriptions].sort((a, b) => {
+            const annualA = a.cycle === 'month' ? a.price * 12 : a.price;
+            const annualB = b.cycle === 'month' ? b.price * 12 : b.price;
+            return annualB - annualA;
+        });
+
+        let totalMonthly = 0;
+        let totalYearly = 0;
+
+        sortedSubs.forEach(sub => {
+            let monthly = sub.cycle === 'month' ? sub.price : sub.price / 12;
+            let yearly = sub.cycle === 'month' ? sub.price * 12 : sub.price;
+
+            totalMonthly += monthly;
+            totalYearly += yearly;
+
+            const item = document.createElement('div');
+            item.className = 'sub-item';
+            item.innerHTML = `
+                <div class="sub-info">
+                    <h4>${escapeHtml(sub.name)}</h4>
+                    <span>${sub.cycle === 'month' ? '月繳' : '年繳'}</span>
+                </div>
+                <div class="sub-price-action">
+                    <div class="sub-price">
+                        <div class="amount">$${sub.price.toLocaleString()}</div>
+                        <div class="cycle">折合年使 $${Math.round(yearly).toLocaleString()}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteSubscription(${sub.id})">🗑️</button>
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+
+        monthlyTotalEl.innerText = `$${Math.round(totalMonthly).toLocaleString()}`;
+        yearlyTotalEl.innerText = `$${Math.round(totalYearly).toLocaleString()}`;
+        itemCountEl.innerText = `${subscriptions.length} 項`;
+    }
+
+    // 防止 XSS 攻擊的簡單跳脫函數
+    function escapeHtml(text) {
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // 初次載入渲染
+    render();
+</script>
+
+</body>
+</html>
