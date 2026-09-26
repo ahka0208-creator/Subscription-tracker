@@ -13,6 +13,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent: #38bdf8;
+            --warning: #f59e0b;
         }
 
         body {
@@ -197,7 +198,7 @@
         .sub-price-action {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .sub-price {
@@ -213,15 +214,21 @@
             color: var(--text-muted);
         }
 
-        .delete-btn {
+        .action-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .action-btn {
             background: transparent;
             border: none;
-            color: #64748b;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
             padding: 4px;
+            border-radius: 6px;
         }
-        .delete-btn:hover { color: var(--primary); }
+        .edit-btn:hover { background: rgba(56, 189, 248, 0.1); }
+        .delete-btn:hover { background: rgba(244, 63, 94, 0.1); }
 
         .empty-tip {
             text-align: center;
@@ -283,7 +290,6 @@
 </div>
 
 <script>
-    // 初始化或從 LocalStorage 讀取資料
     let subscriptions = JSON.parse(localStorage.getItem('subscriptions')) || [
         { id: 1, name: 'Netflix 高級版', price: 93, cycle: 'month' },
         { id: 2, name: 'iCloud 200GB', price: 23, cycle: 'month' },
@@ -321,9 +327,37 @@
         saveAndRender();
     }
 
-    function deleteSubscription(id) {
-        subscriptions = subscriptions.filter(sub => sub.id !== id);
+    // 編輯訂閱功能
+    function editSubscription(id) {
+        const sub = subscriptions.find(s => s.id === id);
+        if (!sub) return;
+
+        const newName = prompt('修改服務名稱：', sub.name);
+        if (newName === null) return; // 用家按取消
+
+        const newPriceStr = prompt('修改金額 (HKD)：', sub.price);
+        if (newPriceStr === null) return;
+        const newPrice = parseFloat(newPriceStr);
+
+        if (!newName.trim() || isNaN(newPrice) || newPrice <= 0) {
+            alert('修改失敗：請輸入有效嘅名稱與金額！');
+            return;
+        }
+
+        const newCycle = confirm('想設定為「年繳」嗎？\n(按「確定」改為年繳，按「取消」維持月繳)') ? 'year' : 'month';
+
+        sub.name = newName.trim();
+        sub.price = newPrice;
+        sub.cycle = newCycle;
+
         saveAndRender();
+    }
+
+    function deleteSubscription(id) {
+        if (confirm('確定要刪除呢個訂閱項目？')) {
+            subscriptions = subscriptions.filter(sub => sub.id !== id);
+            saveAndRender();
+        }
     }
 
     function render() {
@@ -342,7 +376,6 @@
             return;
         }
 
-        // 按每年換算開支由大到小排序
         const sortedSubs = [...subscriptions].sort((a, b) => {
             const annualA = a.cycle === 'month' ? a.price * 12 : a.price;
             const annualB = b.cycle === 'month' ? b.price * 12 : b.price;
@@ -371,7 +404,10 @@
                         <div class="amount">$${sub.price.toLocaleString()}</div>
                         <div class="cycle">折合年使 $${Math.round(yearly).toLocaleString()}</div>
                     </div>
-                    <button class="delete-btn" onclick="deleteSubscription(${sub.id})">🗑️</button>
+                    <div class="action-btns">
+                        <button class="action-btn edit-btn" onclick="editSubscription(${sub.id})" title="編輯">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteSubscription(${sub.id})" title="刪除">🗑️</button>
+                    </div>
                 </div>
             `;
             listContainer.appendChild(item);
@@ -382,13 +418,11 @@
         itemCountEl.innerText = `${subscriptions.length} 項`;
     }
 
-    // 防止 XSS 攻擊的簡單跳脫函數
     function escapeHtml(text) {
         const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
         return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 
-    // 初次載入渲染
     render();
 </script>
 
